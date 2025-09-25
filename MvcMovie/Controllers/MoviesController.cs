@@ -20,8 +20,8 @@ public class MoviesController : Controller
     }
 
     // GET: Movies
-    // IMPORTANT: Added 'movieRating' parameter here
-    public async Task<IActionResult> Index(string movieGenre, string searchString, string movieRating)
+    //  Added 'isAjax' parameter here
+    public async Task<IActionResult> Index(string movieGenre, string searchString, string movieRating, bool isAjax = false)
     {
         if (_context.Movie == null)
         {
@@ -33,8 +33,7 @@ public class MoviesController : Controller
                                         orderby m.Genre
                                         select m.Genre;
 
-        // Use LINQ to get list of ratings.
-        // This is new: Fetch unique ratings for the dropdown
+        // Use LINQ to get list of ratings. (This is new)
         IQueryable<string> ratingQuery = from m in _context.Movie
                                          orderby m.Rating
                                          select m.Rating;
@@ -42,19 +41,19 @@ public class MoviesController : Controller
         var movies = from m in _context.Movie
                      select m;
 
-        // Apply search string filter (your existing logic)
+        // Apply search string filter 
         if (!string.IsNullOrEmpty(searchString))
         {
             movies = movies.Where(s => s.Title!.ToUpper().Contains(searchString.ToUpper()));
         }
 
-        // Apply genre filter (your existing logic)
+        // Apply genre filter 
         if (!string.IsNullOrEmpty(movieGenre))
         {
             movies = movies.Where(x => x.Genre == movieGenre);
         }
 
-        // Apply rating filter (THIS IS THE NEW LOGIC)
+        // Apply rating filter (Ajax part)
         if (!string.IsNullOrEmpty(movieRating))
         {
             movies = movies.Where(x => x.Rating == movieRating);
@@ -71,10 +70,15 @@ public class MoviesController : Controller
             SearchString = searchString // Preserve search string
         };
 
+        //  Return PartialView for AJAX requests
+        if (isAjax)
+        {
+            return PartialView("_MovieListPartial", movieGenreVM);
+        }
+
         return View(movieGenreVM);
     }
 
-    // ... (rest of your controller methods like Details, Create, Edit, Delete - these remain unchanged)
     // GET: Movies/Details/5
     public async Task<IActionResult> Details(int? id)
     {
