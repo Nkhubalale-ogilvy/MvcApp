@@ -37,7 +37,7 @@ public static class SeedData
         {
             adminUser = new IdentityUser
             {
-                UserName = "Nkadimeng",
+                UserName = "Nkadimeng@example.com",
                 Email = "Nkadimeng@example.com",
                 EmailConfirmed = true
             };
