@@ -4,6 +4,6 @@ namespace MvcMovie.Models
 {
 public class ApplicationUser : IdentityUser
 {
-    // We'll add ProfilePicturePath later
+    public string? ProfilePicturePath { get; set; }
 }
 }
