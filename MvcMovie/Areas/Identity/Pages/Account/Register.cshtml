@@ -29,7 +29,8 @@
             </div>
             <div class="form-group mb-3">
                 <label asp-for="Input.ProfilePicture">Profile Picture</label>
-                <input type="file" name="ProfilePicture" class="form-control" />
+                <input asp-for="Input.ProfilePicture" type="file" class="form-control" />
+                <span asp-validation-for="Input.ProfilePicture" class="text-danger"></span>
             </div>
             <button id="registerSubmit" type="submit" class="w-100 btn btn-lg btn-primary">Register</button>
         </form>

@@ -1,11 +1,20 @@
 @using Microsoft.AspNetCore.Identity
+@using MvcMovie.Models
 
-@inject SignInManager<IdentityUser> SignInManager
-@inject UserManager<IdentityUser> UserManager
+@inject SignInManager<ApplicationUser> SignInManager
+@inject UserManager<ApplicationUser> UserManager
 
 <ul class="navbar-nav">
 @if (SignInManager.IsSignedIn(User))
 {
+    var currentUser = await UserManager.GetUserAsync(User);
+
+    if (!string.IsNullOrEmpty(currentUser?.ProfilePicturePath))
+    {
+        <li class="nav-item">
+            <img src="@currentUser.ProfilePicturePath" alt="Profile Picture" style="width:40px;height:40px;border-radius:50%;object-fit:cover;margin-right:8px;" />
+        </li>
+    }
     <li class="nav-item">
         <a id="manage" class="nav-link text-dark" asp-area="Identity" asp-page="/Account/Manage/Index" title="Manage">Hello @UserManager.GetUserName(User)!</a>
     </li>

@@ -433,3 +433,9 @@ FodyWeavers.xsd
 *.db
 *.db-shm
 *.db-wal
+
+# Ignore all files in uploads folder
+MvcMovie/wwwroot/uploads/*
+
+# Keep the .gitkeep file
+MvcMovie/!wwwroot/uploads/.gitkeep
