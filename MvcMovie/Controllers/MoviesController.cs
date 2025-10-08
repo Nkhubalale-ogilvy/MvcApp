@@ -9,6 +9,8 @@ using MvcMovie.Data;
 using MvcMovie.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Logging;
+using Microsoft.AspNetCore.Hosting;
+using System.IO;
 
 namespace MvcMovie.Controllers
 {
@@ -16,11 +18,13 @@ namespace MvcMovie.Controllers
     {
         private readonly MvcMovieContext _context;
         private readonly ILogger<MoviesController> _logger;
+        private readonly IWebHostEnvironment _webHostEnvironment;
 
-        public MoviesController(MvcMovieContext context, ILogger<MoviesController> logger)
+        public MoviesController(MvcMovieContext context, ILogger<MoviesController> logger, IWebHostEnvironment webHostEnvironment)
         {
             _context = context;
             _logger = logger;
+            _webHostEnvironment = webHostEnvironment;
         }
 
         // GET: Movies
@@ -120,10 +124,26 @@ namespace MvcMovie.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> Create([Bind("Id,Title,ReleaseDate,Genre,Price,Rating")] Movie movie)
+        public async Task<IActionResult> Create([Bind("Id,Title,ReleaseDate,Genre,Price,Rating")] Movie movie, IFormFile Image)
         {
             if (ModelState.IsValid)
             {
+                if (Image != null && Image.Length > 0)
+                {
+                    var uploadsFolder = Path.Combine(_webHostEnvironment.WebRootPath, "uploads/movie-images");
+                    Directory.CreateDirectory(uploadsFolder);
+
+                    var uniqueFileName = Guid.NewGuid().ToString() + Path.GetExtension(Image.FileName);
+                    var filePath = Path.Combine(uploadsFolder, uniqueFileName);
+
+                    using (var fileStream = new FileStream(filePath, FileMode.Create))
+                    {
+                        await Image.CopyToAsync(fileStream);
+                    }
+
+                    movie.ImagePath = "/uploads/movie-images/" + uniqueFileName;
+                }
+
                 _context.Add(movie);
                 await _context.SaveChangesAsync();
                 _logger.LogInformation("Admin user {UserName} created new movie: {MovieTitle} (ID: {MovieId})", User.Identity?.Name ?? "Unknown", movie.Title, movie.Id);
@@ -158,7 +178,7 @@ namespace MvcMovie.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Title,ReleaseDate,Genre,Price,Rating")] Movie movie)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Title,ReleaseDate,Genre,Price,Rating")] Movie movie, IFormFile Image)
         {
             _logger.LogInformation("Admin user {UserName} attempting to save edits for movie ID: {MovieId}", User.Identity?.Name ?? "Unknown", id);
 
@@ -172,6 +192,22 @@ namespace MvcMovie.Controllers
             {
                 try
                 {
+                    if (Image != null && Image.Length > 0)
+                    {
+                        var uploadsFolder = Path.Combine(_webHostEnvironment.WebRootPath, "uploads/movie-images");
+                        Directory.CreateDirectory(uploadsFolder);
+
+                        var uniqueFileName = Guid.NewGuid().ToString() + Path.GetExtension(Image.FileName);
+                        var filePath = Path.Combine(uploadsFolder, uniqueFileName);
+
+                        using (var fileStream = new FileStream(filePath, FileMode.Create))
+                        {
+                            await Image.CopyToAsync(fileStream);
+                        }
+
+                        movie.ImagePath = "/uploads/movie-images/" + uniqueFileName;
+                    }
+
                     _context.Update(movie);
                     await _context.SaveChangesAsync();
                     _logger.LogInformation("Admin user {UserName} successfully updated movie: {MovieTitle} (ID: {MovieId})", User.Identity?.Name ?? "Unknown", movie.Title, movie.Id);
