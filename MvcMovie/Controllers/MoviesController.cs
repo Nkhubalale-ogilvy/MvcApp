@@ -91,6 +91,7 @@ namespace MvcMovie.Controllers
         }
 
         // GET: Movies/Details/5
+        [Authorize]
         public async Task<IActionResult> Details(int? id)
         {
             _logger.LogInformation("User requested Movie Details for ID: {MovieId}", id);
