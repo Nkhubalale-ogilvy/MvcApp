@@ -33,4 +33,6 @@ public class Movie
     
     public string? ImagePath { get; set; }
 
+    public string? VideoPath { get; set; }
+
 }
