@@ -124,7 +124,7 @@ namespace MvcMovie.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> Create([Bind("Id,Title,ReleaseDate,Genre,Price,Rating")] Movie movie, IFormFile Image)
+        public async Task<IActionResult> Create([Bind("Id,Title,ReleaseDate,Genre,Price,Rating")] Movie movie, IFormFile Image, IFormFile Video)
         {
             if (ModelState.IsValid)
             {
@@ -142,6 +142,22 @@ namespace MvcMovie.Controllers
                     }
 
                     movie.ImagePath = "/uploads/movie-images/" + uniqueFileName;
+                }
+
+                if (Video != null && Video.Length > 0)
+                {
+                    var uploadsFolder = Path.Combine(_webHostEnvironment.WebRootPath, "uploads/movie-videos");
+                    Directory.CreateDirectory(uploadsFolder);
+
+                    var uniqueFileName = Guid.NewGuid().ToString() + Path.GetExtension(Video.FileName);
+                    var filePath = Path.Combine(uploadsFolder, uniqueFileName);
+
+                    using (var fileStream = new FileStream(filePath, FileMode.Create))
+                    {
+                        await Video.CopyToAsync(fileStream);
+                    }
+
+                    movie.VideoPath = "/uploads/movie-videos/" + uniqueFileName;
                 }
 
                 _context.Add(movie);
@@ -178,7 +194,7 @@ namespace MvcMovie.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Title,ReleaseDate,Genre,Price,Rating")] Movie movie, IFormFile Image)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Title,ReleaseDate,Genre,Price,Rating")] Movie movie, IFormFile Image, IFormFile Video)
         {
             _logger.LogInformation("Admin user {UserName} attempting to save edits for movie ID: {MovieId}", User.Identity?.Name ?? "Unknown", id);
 
@@ -206,6 +222,22 @@ namespace MvcMovie.Controllers
                         }
 
                         movie.ImagePath = "/uploads/movie-images/" + uniqueFileName;
+                    }
+
+                    if (Video != null && Video.Length > 0)
+                    {
+                        var uploadsFolder = Path.Combine(_webHostEnvironment.WebRootPath, "uploads/movie-videos");
+                        Directory.CreateDirectory(uploadsFolder);
+
+                        var uniqueFileName = Guid.NewGuid().ToString() + Path.GetExtension(Video.FileName);
+                        var filePath = Path.Combine(uploadsFolder, uniqueFileName);
+
+                        using (var fileStream = new FileStream(filePath, FileMode.Create))
+                        {
+                            await Video.CopyToAsync(fileStream);
+                        }
+
+                        movie.VideoPath = "/uploads/movie-videos/" + uniqueFileName;
                     }
 
                     _context.Update(movie);
