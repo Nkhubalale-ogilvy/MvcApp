@@ -6,6 +6,8 @@ using Microsoft.AspNetCore.Identity;
 using Serilog;
 using Serilog.Events;
 using Serilog.Formatting.Compact;
+using MvcMovie.Interfaces; 
+using MvcMovie.Services; 
 
 // Serilog configuration
 Log.Logger = new LoggerConfiguration()
@@ -55,6 +57,9 @@ try
     builder.Services.AddControllersWithViews();
     builder.Services.AddRazorPages();
 
+    // Register MovieService for Dependency Injection
+    builder.Services.AddScoped<IMovieService, MovieService>();
+
     var app = builder.Build();
 
     // Seed data initialization
@@ -72,7 +77,6 @@ try
     if (!app.Environment.IsDevelopment())
     {
         app.UseExceptionHandler("/Home/Error");
-        // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
         app.UseHsts();
     }
 
