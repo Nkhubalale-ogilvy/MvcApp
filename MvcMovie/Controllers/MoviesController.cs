@@ -1,4 +1,3 @@
-using System;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
@@ -116,7 +115,7 @@ namespace MvcMovie.Controllers
                     }
                     ModelState.AddModelError(string.Empty, "Failed to update movie.");
                 }
-                catch (Microsoft.EntityFrameworkCore.DbUpdateConcurrencyException ex)
+                catch (Microsoft.EntityFrameworkCore.DbUpdateConcurrencyException)
                 {
                     if (!await _movieService.MovieExistsAsync(movie.Id))
                     {
